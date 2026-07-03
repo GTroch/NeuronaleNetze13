@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Künstliche Neuronale Netze – Interaktives Lernmodul</title>
+<style>
+  :root{
+    --ink:#1e293b;--muted:#64748b;--line:#e2e8f0;--panel:#fff;--bg:#f1f5f9;
+    --brand:#4338ca;--brand-d:#3730a3;--brand-l:#e0e7ff;
+    --c0:#0d9488;--c1:#d97706;--c2:#9333ea;--pos:#2563eb;--neg:#ea580c;
+    --good:#15803d;--bad:#dc2626;--amber:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+  header.hero{background:linear-gradient(135deg,#1e1b4b,#4338ca);color:#fff;padding:44px 24px 54px;text-align:center}
+  header.hero h1{margin:0 0 8px;font-size:2rem}
+  header.hero .sub{color:#c7d2fe;max-width:780px;margin:0 auto;font-size:1.02rem}
+  header.hero .meta{margin-top:14px;font-size:.82rem;color:#a5b4fc}
+  nav{position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 1px 6px rgba(0,0,0,.05)}
+  nav .wrap{max-width:1080px;margin:0 auto;display:flex;flex-wrap:wrap;gap:2px;padding:7px 12px}
+  nav a{padding:6px 9px;border-radius:7px;text-decoration:none;color:var(--ink);font-weight:600;font-size:.8rem}
+  nav a:hover{background:#eef2ff}
+  main{max-width:1080px;margin:0 auto;padding:8px 16px 70px}
+  section{background:var(--panel);border-radius:16px;padding:26px 30px;margin:22px 0;box-shadow:0 4px 18px rgba(15,23,42,.06);border-top:5px solid var(--brand)}
+  h2{font-size:1.5rem;margin:.1em 0 .5em;display:flex;align-items:center;gap:12px}
+  h2 .n{display:inline-flex;min-width:36px;height:36px;padding:0 8px;border-radius:10px;align-items:center;justify-content:center;background:var(--brand);color:#fff;font-size:1rem}
+  h3{font-size:1.16rem;margin:1.3em 0 .4em;color:var(--brand-d)}
+  h4{margin:1.1em 0 .3em}
+  p{margin:.55em 0}
+  .lead{font-size:1.05rem;color:#334155}
+  .muted{color:var(--muted)}
+  ul,ol{margin:.4em 0 .9em}
+  li{margin:.25em 0}
+  .formula{font-family:'Cambria Math','Times New Roman',Georgia,serif;font-size:1.14rem;background:#f8fafc;border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:8px;padding:12px 16px;margin:12px 0;text-align:center;overflow-x:auto}
+  .formula i{font-style:italic}
+  .frac{display:inline-block;vertical-align:-0.6em;text-align:center;margin:0 .12em}
+  .frac>span{display:block;padding:0 .35em}
+  .frac .num{border-bottom:1.4px solid currentColor}
+  .merke{background:var(--brand-l);border-radius:10px;padding:14px 16px;margin:14px 0}
+  .merke h4{margin:0 0 .3em;color:var(--brand-d)}
+  .ex{background:#fffdf5;border:1px solid #e7d9a6;border-left:5px solid var(--amber);border-radius:10px;padding:16px 18px;margin:18px 0}
+  .ex .tag{display:inline-block;background:var(--amber);color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:6px;letter-spacing:.4px;margin-bottom:8px}
+  .ex .q{font-weight:600;margin-bottom:8px}
+  .ex textarea{width:100%;min-height:70px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;resize:vertical}
+  .ex input.num{width:74px;border:1px solid var(--line);border-radius:6px;padding:5px 7px;font:inherit;text-align:center}
+  .ex .reveal{margin-top:10px;background:var(--brand);color:#fff;border:none;border-radius:8px;padding:9px 15px;font:inherit;font-weight:600;cursor:pointer}
+  .ex .reveal:disabled{opacity:.4;cursor:not-allowed}
+  .ex .hintline{font-size:.82rem;color:var(--muted);margin-top:6px}
+  .ex .solution{margin-top:14px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:12px 15px}
+  .ex .solution h5{margin:.1em 0 .4em;color:var(--good);font-size:.95rem}
+  table.tbl{border-collapse:collapse;margin:10px 0;font-size:.92rem}
+  table.tbl th,table.tbl td{border:1px solid var(--line);padding:6px 10px;text-align:center}
+  table.tbl th{background:#f8fafc}
+  .demo{border:1px solid var(--line);border-radius:14px;padding:16px;margin:18px 0;background:#fcfdff}
+  .demo h4{margin-top:0;display:flex;align-items:center;gap:8px}
+  .badge{font-size:.68rem;font-weight:700;color:#fff;background:var(--brand);padding:2px 8px;border-radius:6px;letter-spacing:.4px}
+  .grid2{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+  @media(max-width:860px){.grid2{grid-template-columns:1fr}}
+  canvas{background:#fff;border:1px solid var(--line);border-radius:10px;touch-action:none;max-width:100%}
+  .ctrl{display:flex;flex-direction:column;gap:9px;min-width:240px}
+  .row{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+  button{font:inherit;font-weight:600;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;background:#475569;color:#fff;transition:.15s}
+  button:hover{filter:brightness(1.1)}
+  button:disabled{opacity:.4;cursor:not-allowed;filter:none}
+  button.p{background:var(--brand)} button.g{background:var(--good)} button.ghost{background:#e2e8f0;color:#334155}
+  select{padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;font:inherit}
+  label.sl{font-size:.86rem;display:flex;flex-direction:column;gap:2px}
+  label.ck{font-size:.86rem;display:flex;gap:6px;align-items:center}
+  input[type=range]{width:100%}
+  .readout{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:9px 12px;font-family:'Consolas',monospace;font-size:.82rem;white-space:pre-wrap;line-height:1.45}
+  .hint{font-size:.83rem;color:var(--muted)}
+  .tip{background:#eef2ff;border-radius:10px;padding:12px 15px;margin:12px 0;font-size:.96rem}
+  .warn{background:#fef2f2;border-left:4px solid var(--bad);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:.95rem}
+  pre.code{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;overflow-x:auto;font-family:'Consolas',monospace;font-size:.84rem;line-height:1.5}
+  pre.code .c{color:#7dd3fc}
+  .legend{font-size:.82rem;display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  footer{text-align:center;color:var(--muted);font-size:.83rem;padding:26px 16px 50px}
+  .kbd{font-family:'Consolas',monospace;background:#eef2ff;padding:1px 6px;border-radius:5px;font-size:.9em}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>Künstliche Neuronale Netze</h1>
+  <div class="sub">Ein interaktives Lernmodul: von Trenngeraden und dem Aufbau eines Netzes über Sigmoid, Forward-Propagation, Fehlerfunktion und Gradientenabstieg bis zum selbst trainierten Netz-Simulator und Anwendungen (Ziffern, Bilder).</div>
+  <div class="meta">Jahrgangsstufe 13 · nach dem ISB-Arbeitsheft „Künstliche Neuronale Netze" (Reitmaier · Pfeffer · Fuchs · Gräßl, KI@Informatik13) · Simulator inspiriert vom NetLaboratory (klassenkarte.de/netlab)</div>
+</header>
+
+<nav><div class="wrap">
+  <a href="#unplugged">1 Unplugged</a>
+  <a href="#aufbau">2 Aufbau</a>
+  <a href="#sigmoid">Sigmoid</a>
+  <a href="#forward">3 Forward</a>
+  <a href="#fehler">4 Fehler/MSE</a>
+  <a href="#simulator">5 Simulator</a>
+  <a href="#mehrklassen">6–7 Mehrklassen</a>
+  <a href="#gradient">8 Gradientenabstieg</a>
+  <a href="#backprop">Backprop</a>
+  <a href="#ziffern">9 Ziffern</a>
+  <a href="#bilder">10 Bilder</a>
+</div></nav>
+
+<main>
+
+<!-- 1 UNPLUGGED -->
+<section id="unplugged">
+  <h2><span class="n">1</span> Neuronale Netze „unplugged"</h2>
+  <p class="lead">Ein Biologe untersucht eine neue Orinoco-Fischart. Für zwölf Aquarien notierte er <strong>Wassertemperatur</strong> und <strong>pH-Wert</strong> und ob sich der Fisch <span style="color:var(--good);font-weight:600">wohlfühlte (grün)</span> oder ob es <span style="color:var(--bad);font-weight:600">Probleme gab (rot)</span>. Ziel: die beiden Bereiche im Diagramm trennen.</p>
+  <div class="demo">
+    <h4><span class="badge">INTERAKTIV</span> Trenngeraden legen</h4>
+    <div class="grid2">
+      <canvas id="unpCanvas" width="440" height="380"></canvas>
+      <div class="ctrl">
+        <p class="hint">Ein einzelnes Neuron (Perzeptron) entspricht einer Geraden. Verschiebe die drei Geraden mit den Reglern so, dass die grünen Punkte in dem Bereich liegen, in dem <em>alle drei</em> Geraden „feuern" (grüne Seite).</p>
+        <label class="sl">Gerade 1 – Neigung <input type="range" id="u_a1" min="-90" max="90" value="-30"></label>
+        <label class="sl">Gerade 1 – Lage <input type="range" id="u_o1" min="-160" max="160" value="40"></label>
+        <label class="sl">Gerade 2 – Neigung <input type="range" id="u_a2" min="-90" max="90" value="60"></label>
+        <label class="sl">Gerade 2 – Lage <input type="range" id="u_o2" min="-160" max="160" value="-30"></label>
+        <label class="sl">Gerade 3 – Neigung <input type="range" id="u_a3" min="-90" max="90" value="10"></label>
+        <label class="sl">Gerade 3 – Lage <input type="range" id="u_o3" min="-160" max="160" value="-70"></label>
+        <div class="readout" id="unpOut">…</div>
+      </div>
+    </div>
+  </div>
+  <div class="ex" data-min="20">
+    <span class="tag">ARBEITSAUFTRAG 1 · Bereiche festlegen</span>
+    <div class="q">Zeichne möglichst <em>wenige</em> Trenngeraden ein, sodass Bereiche entstehen, in denen sich nur „wohlgefühlt"- oder nur „Problem"-Fische befinden. Wie viele Geraden brauchst du und wie hängen sie zusammen?</div>
+    <textarea placeholder="Deine Überlegung …"></textarea>
+    <div class="hintline">Freischaltung nach eigener Eingabe.</div>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Es werden <strong>drei Trenngeraden</strong> benötigt, von denen jede ein <strong>Perzeptron</strong> (Neuron) darstellt. Ein grüner Punkt (wohlgefühlt) wird nur dann erkannt, wenn <strong>alle drei Neuronen „feuern"</strong> – die Geraden werden also über eine Art <strong>UND-Verknüpfung</strong> zusammengeschaltet. Feuert mindestens eines nicht, ist der Punkt rot. Da alle drei Neuronen dieselbe Eingabe (Temperatur, pH) erhalten, fasst man diese in einer gemeinsamen <strong>Eingabeschicht</strong> zusammen – das ist bereits ein kleines neuronales Netz mit einer verdeckten Schicht aus drei Neuronen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 AUFBAU -->
+<section id="aufbau">
+  <h2><span class="n">2</span> Aufbau eines künstlichen neuronalen Netzes</h2>
+  <p>Künstliche neuronale Netze sind vom Gehirn inspiriert und bestehen aus <strong>künstlichen Neuronen</strong>, die in <strong>Schichten</strong> angeordnet sind:</p>
+  <div class="merke">
+    <h4>Merke · Schichten eines Netzes</h4>
+    <ul>
+      <li><strong>Eingabeschicht:</strong> ein Neuron pro Merkmal. Aktivierungsfunktion = <em>Identität</em> (der Wert wird durchgereicht).</li>
+      <li><strong>Verdeckte Schicht(en):</strong> frei wählbare Anzahl an Schichten/Neuronen. Aktivierungsfunktion = <em>Sigmoid</em>.</li>
+      <li><strong>Ausgabeschicht:</strong> ein Neuron pro Klasse (bei 2 Klassen genügt auch eines). Aktivierungsfunktion = <em>Sigmoid</em>.</li>
+    </ul>
+  </div>
+  <p><b>Beispiel (Tiere):</b> Tiere sollen anhand von <em>Augengröße</em> und <em>Zahnlänge</em> in <em>friedlich</em>/<em>aggressiv</em> klassifiziert werden. → Eingabeschicht: 2 Neuronen; Ausgabeschicht: 1 (bzw. 2) Neuron(en); verdeckte Schicht: frei, z. B. 2–3 Neuronen. Anschließend werden alle <strong>Gewichte</strong> und <strong>Bias-Werte</strong> zufällig initialisiert. In den Grafiken werden Gewichte je nach Vorzeichen/Größe unterschiedlich <span style="color:var(--pos);font-weight:600">blau (positiv)</span> bzw. <span style="color:var(--neg);font-weight:600">orange (negativ)</span> und dick dargestellt – das siehst du live im Simulator (Abschnitt 5).</p>
+</section>
+
+<!-- SIGMOID -->
+<section id="sigmoid">
+  <h2>Die Sigmoid-Funktion</h2>
+  <p>In allen Neuronen außer der Eingabeschicht wird die <strong>Sigmoid-Funktion</strong> als Aktivierungsfunktion verwendet. Sie „quetscht" jeden Wert in das Intervall (0; 1):</p>
+  <div class="formula"><i>S</i>(<i>x</i>) = <span class="frac"><span class="num"><i>e<sup>x</sup></i></span><span>1 + <i>e<sup>x</sup></i></span></span> = <span class="frac"><span class="num">1</span><span>1 + <i>e</i><sup>−<i>x</i></sup></span></span></div>
+  <div class="demo">
+    <h4><span class="badge">INTERAKTIV</span> Sigmoid erkunden</h4>
+    <div class="grid2">
+      <canvas id="sigCanvas" width="420" height="300"></canvas>
+      <div class="ctrl">
+        <label class="sl">x = <span id="sigXv">0.0</span><input type="range" id="sigX" min="-8" max="8" step="0.1" value="0"></label>
+        <div class="readout" id="sigOut">…</div>
+        <p class="hint">Große positive x → nahe 1 (Neuron „feuert"), große negative x → nahe 0. Bei x = 0 ist S(0) = 0,5.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 FORWARD -->
+<section id="forward">
+  <h2><span class="n">3</span> Forward-Propagation</h2>
+  <p>Bei der <strong>Forward-Propagation</strong> fließt eine Eingabe durch das Netz. In jedem Neuron wird die <strong>gewichtete Summe</strong> der Eingaben plus Bias gebildet und darauf die Aktivierungsfunktion angewendet.</p>
+  <div class="formula">Neuron-Ausgabe = <i>S</i>( <i>w</i><sub>1</sub>·<i>x</i><sub>1</sub> + <i>w</i><sub>2</sub>·<i>x</i><sub>2</sub> + … + <i>b</i> )</div>
+  <p><b>Beispiel (Pinguin (4 | 0), Label 1):</b> Eingaben 4 und 0 werden durchgereicht. Ein verdecktes Neuron mit Gewichten (−1 | 0) berechnet die gewichtete Summe −1·4 + 0·0 = −4 und daraus <i>S</i>(−4) ≈ 0,018. Nach Weiterrechnung ergibt das Ausgabeneuron ≈ 0,95. Da 0,95 ≥ 0,5, wird der Pinguin als <em>friedlich</em> klassifiziert (korrekt).</p>
+  <div class="demo">
+    <h4><span class="badge">INTERAKTIV</span> Forward-Propagation-Rechner (Netz 2 – 2 – 1)</h4>
+    <div class="grid2">
+      <canvas id="fwCanvas" width="440" height="300"></canvas>
+      <div class="ctrl">
+        <div class="row"><label class="sl">x₁<input class="num" id="fw_x1" value="4"></label><label class="sl">x₂<input class="num" id="fw_x2" value="0"></label></div>
+        <div class="hint">Verdeckte Neuronen (Gewichte w zu x₁,x₂ und Bias b):</div>
+        <div class="row">H1: <input class="num" id="fw_h1w1" value="1.5"><input class="num" id="fw_h1w2" value="-1"><input class="num" id="fw_h1b" value="-1"></div>
+        <div class="row">H2: <input class="num" id="fw_h2w1" value="-1"><input class="num" id="fw_h2w2" value="0"><input class="num" id="fw_h2b" value="2"></div>
+        <div class="hint">Ausgabeneuron (Gewichte zu H1,H2 und Bias):</div>
+        <div class="row">O: <input class="num" id="fw_ow1" value="2"><input class="num" id="fw_ow2" value="-1.5"><input class="num" id="fw_ob" value="0.5"></div>
+        <div class="readout" id="fwOut">…</div>
+      </div>
+    </div>
+  </div>
+  <div class="ex" data-min="20">
+    <span class="tag">ARBEITSAUFTRAG 2 · Forward-Propagation durchführen</span>
+    <div class="q">Führe für das Schaf (2 | 2) und den Hai (1 | 4) eine Forward-Propagation durch und beurteile das Ergebnis.</div>
+    <textarea placeholder="Beschreibe die Rechenschritte und dein Ergebnis (welche Klasse?) …" style="min-height:90px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Man reicht die Eingaben durch die Eingabeschicht (Identität), bildet in jedem verdeckten Neuron die gewichtete Summe und wendet die Sigmoid-Funktion an, und wiederholt das für das Ausgabeneuron. Im Arbeitsheft ergibt sich für den <strong>Hai</strong> am ersten Ausgabeneuron ein Wert von etwa <strong>0,62 ≥ 0,5</strong> – der Hai wird also als <em>friedlich</em> klassifiziert, obwohl das erwartete Label <em>aggressiv</em> ist: eine <strong>Fehlklassifikation</strong>. Das initiale Netz (zufällige Gewichte) macht demnach Fehler und muss trainiert werden. (Die genauen Zahlenwerte hängen von den Startgewichten ab; entscheidend ist das Vorgehen und die Erkenntnis, dass das untrainierte Netz noch nicht zuverlässig klassifiziert.)</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 FEHLER -->
+<section id="fehler">
+  <h2><span class="n">4</span> Die Fehlerfunktion · Mittlerer quadratischer Fehler</h2>
+  <p>Um die Qualität eines Netzes zu bewerten, misst man seinen <strong>Fehler</strong> auf den Trainingsdaten. Für einen Datenpunkt bildet man die <strong>quadrierte Abweichung</strong> zwischen Ausgabe <i>y</i> und Ziel-Label <i>t</i>. Für den falsch klassifizierten Hai (Ausgabe 0,62, Ziel 0) ergibt sich z. B.:</p>
+  <div class="formula">(0 − 0,62)<sup>2</sup> = 0,3844</div>
+  <div class="merke">
+    <h4>Merke · Mittlerer quadratischer Fehler (MSE)</h4>
+    <div class="formula" style="background:transparent;border:none">MSE = <span class="frac"><span class="num">1</span><span><i>N</i></span></span> <span style="font-size:1.2em">Σ</span><sub><i>i</i>=1</sub><sup><i>N</i></sup> ( <i>t<sub>i</sub></i> − <i>y<sub>i</sub></i> )<sup>2</sup></div>
+    <p style="margin:0">Durch das Quadrieren zählen positive und negative Abweichungen gleich, und große Fehler fallen stärker ins Gewicht. Geteilt wird durch die Anzahl <i>N</i> der Datenpunkte, um den Mittelwert zu bilden.</p>
+  </div>
+  <div class="demo">
+    <h4><span class="badge">INTERAKTIV</span> MSE-Rechner</h4>
+    <div class="grid2">
+      <div>
+        <table class="tbl" id="mseTable">
+          <thead><tr><th>Datenpunkt</th><th>Ziel t</th><th>Ausgabe y</th><th>(t−y)²</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="ctrl">
+        <p class="hint">Ändere die Ausgaben y und beobachte, wie sich der mittlere quadratische Fehler verändert.</p>
+        <div class="readout" id="mseOut">…</div>
+      </div>
+    </div>
+  </div>
+  <div class="ex" data-min="8">
+    <span class="tag">ARBEITSAUFTRAG 3 · Fehlerberechnung</span>
+    <div class="q">Für drei Trainingsdatenpunkte lauten die quadrierten Fehler 0,0025, 0,3844 und 0,0100. Gib den <strong>mittleren</strong> quadratischen Fehler an. (Allgemein: mit Open Roberta die Ausgaben bestimmen und mit der Excel-Vorlage die Fehler berechnen.)</div>
+    <div class="row">MSE = <input class="num" placeholder="?"></div>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>MSE = (0,0025 + 0,3844 + 0,0100) / 3 = 0,3969 / 3 = <b>0,1323</b>. Allgemein summiert man die quadrierten Abweichungen aller Datenpunkte und teilt durch ihre Anzahl <i>N</i>. Ein hoher MSE zeigt an, dass das (initiale) Netz noch schlecht klassifiziert.</p>
+    </div>
+  </div>
+  <div class="ex" data-min="20">
+    <span class="tag">ARBEITSAUFTRAG 4 · Wie kann das Netz optimiert werden?</span>
+    <div class="q">Der Hai wird falsch klassifiziert, weil die Ausgabe des ersten Ausgabeneurons zu hoch ist. Welche Anpassungen im Netz könnten helfen?</div>
+    <textarea placeholder="Deine Ideen …" style="min-height:80px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Man muss die <strong>Gewichte und Bias-Werte</strong> so verändern, dass die Ausgabe des ersten Ausgabeneurons für den Hai <em>kleiner</em> wird (näher an 0), ohne die übrigen Tiere zu verschlechtern. Von Hand ist das mühsam und für viele Punkte kaum lösbar. Genau diese Anpassung übernimmt das <strong>Training</strong> automatisch: Über den <strong>Gradientenabstieg</strong> (Backpropagation) werden alle Gewichte schrittweise in die Richtung verändert, die den Gesamtfehler (MSE) verringert (siehe Abschnitte 5 und 8).</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 SIMULATOR -->
+<section id="simulator">
+  <h2><span class="n">5</span> Der Netz-Simulator – selbst trainieren</h2>
+  <p>Hier trainierst du ein echtes neuronales Netz im Browser (nachempfunden dem <em>NetLaboratory</em>). Wähle einen Datensatz, konfiguriere die verdeckten Schichten und die Lernrate und starte das Training. Der Hintergrund zeigt die <strong>Decision Areas</strong> (die vorhergesagte Klasse pro Bereich), das Netzdiagramm zeigt die <strong>Gewichte</strong> (<span style="color:var(--pos)">blau +</span>/<span style="color:var(--neg)">orange −</span>, Dicke = Betrag).</p>
+  <div class="demo">
+    <h4><span class="badge">SIMULATOR</span> Neuronales Netz</h4>
+    <div class="grid2">
+      <div>
+        <canvas id="nnCanvas" width="440" height="380"></canvas>
+        <canvas id="nnArch" width="440" height="150" style="margin-top:8px"></canvas>
+      </div>
+      <div class="ctrl">
+        <label class="sl">Datensatz<select id="nnDS"></select></label>
+        <label class="sl">Verdeckte Schichten<select id="nnL"><option>0</option><option selected>1</option><option>2</option></select></label>
+        <label class="sl">Neuronen je Schicht = <span id="nnNv">4</span><input type="range" id="nnN" min="2" max="8" step="1" value="4"></label>
+        <label class="sl">Lernrate α<select id="nnA"><option>0.1</option><option>0.3</option><option selected>1</option><option>3</option></select></label>
+        <div class="row">
+          <button class="p" id="nnPlay">▶ Training</button>
+          <button class="ghost" id="nnStep">+50 Epochen</button>
+          <button class="ghost" id="nnReset">↻ Reset</button>
+        </div>
+        <div class="readout" id="nnOut">…</div>
+        <button class="ghost" id="nnEval">Confusion-Matrix &amp; Genauigkeit</button>
+        <div id="nnEvalOut"></div>
+        <div class="legend" id="nnLegend"></div>
+      </div>
+    </div>
+  </div>
+  <div class="ex" data-min="25">
+    <span class="tag">ARBEITSAUFTRAG 5 · Training &amp; Testen</span>
+    <div class="q">Trainiere den Datensatz „Tiere · linear trennbar". Wie hoch wird die Genauigkeit? Erkläre kurz, was eine <strong>Confusion-Matrix</strong> ist und wie man daraus die <strong>Genauigkeit</strong> berechnet.</div>
+    <textarea placeholder="Deine Beobachtung + Definition …" style="min-height:80px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Bei linear trennbaren Daten erreicht das Netz (schon mit 0 oder 1 verdeckter Schicht) <strong>100 % Genauigkeit</strong>. Eine <strong>Confusion-Matrix</strong> stellt tatsächliche Klassen (Zeilen) gegen vorhergesagte Klassen (Spalten) gegenüber; auf der Diagonalen stehen die korrekt klassifizierten Datenpunkte. Die <strong>Genauigkeit</strong> ist der Anteil korrekt klassifizierter Punkte: Genauigkeit = (Summe der Diagonalen) / (Anzahl aller Datenpunkte). Beim Testen verwendet man dafür die <em>Testdaten</em> (nicht die Trainingsdaten).</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6-7 MEHRKLASSEN -->
+<section id="mehrklassen">
+  <h2><span class="n">6–7</span> Nicht linear trennbar &amp; Mehrklassen</h2>
+  <p>Kommen neue Tiere hinzu, sind die Klassen oft <strong>nicht mehr linear trennbar</strong> – eine einzige Gerade genügt nicht. Dann braucht das Netz <strong>verdeckte Schichten</strong>, die gekrümmte Grenzen bilden können. Für <strong>mehr als zwei Klassen</strong> erhält die Ausgabeschicht <strong>ein Neuron pro Klasse</strong>; die Klasse mit der größten Ausgabe „gewinnt".</p>
+  <div class="tip">Probiere es im Simulator (Abschnitt 5): Wähle „Tiere · nicht linear trennbar" und stelle <strong>0</strong> verdeckte Schichten ein – die Grenze bleibt eine Gerade und einige Punkte werden falsch klassifiziert. Mit <strong>1 verdeckten Schicht (2–4 Neuronen)</strong> gelingt die Trennung.</p>
+  <div class="ex" data-min="20">
+    <span class="tag">ARBEITSAUFTRAG 6 · Neue Tiere kommen hinzu</span>
+    <div class="q">Datensatz „Tiere · nicht linear trennbar": Verfolge das Training mit 1 verdeckten Schicht (2 Neuronen). Was beobachtest du im Vergleich zu 0 verdeckten Schichten?</div>
+    <textarea placeholder="Deine Beobachtung …" style="min-height:70px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Mit <strong>0</strong> verdeckten Schichten kann das Netz nur eine <em>gerade</em> Trennlinie ziehen und klassifiziert die nicht linear trennbaren Daten teilweise falsch (Genauigkeit &lt; 100 %). Mit einer <strong>verdeckten Schicht</strong> kann die Entscheidungsgrenze <em>gekrümmt</em> werden, sodass beide Klassen sauber getrennt werden. Bei sehr kleiner Lernrate (α = 0,01) läuft das Training entsprechend langsam – es braucht viele Epochen, bis der Fehler klein wird.</p>
+    </div>
+  </div>
+  <div class="ex" data-min="20">
+    <span class="tag">ARBEITSAUFTRAG 7 · Mehrklassen-Klassifizierung</span>
+    <div class="q">Drei Klassen (friedlich, defensiv, aggressiv): Wie viele Ausgabeneuronen braucht das Netz, und wie viele Neuronen in der verdeckten Schicht? Teste mit „Tiere · 3 Klassen".</div>
+    <textarea placeholder="Deine Vermutung + Testergebnis …" style="min-height:70px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Die Ausgabeschicht braucht <strong>3 Neuronen</strong> (eines je Klasse). Eine verdeckte Schicht genügt, sie muss aber <strong>genügend Neuronen</strong> besitzen, um mehrere Trenngrenzen zu bilden – erfahrungsgemäß mindestens so viele, wie Grenzlinien nötig sind (hier ≈ 3–4). Im Simulator erreicht man mit 1 verdeckten Schicht und 3–4 Neuronen eine sehr hohe Genauigkeit für die drei Klassen.</p>
+    </div>
+  </div>
+  <div class="ex" data-min="20">
+    <span class="tag">ARBEITSAUFTRAG 8 · Champignons</span>
+    <div class="q">Konfiguriere ein Netz zur Klassifizierung von Champignons (Größe, Farb-Homogenität) in 3 Güteklassen (Datensatz „Champignons"). Welche Konfiguration funktioniert gut?</div>
+    <textarea placeholder="Deine Konfiguration (Schichten/Neuronen/α) und Genauigkeit …" style="min-height:70px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Der Champignon-Datensatz ist recht gut trennbar. Eine verdeckte Schicht mit <strong>4–6 Neuronen</strong> und Lernrate α ≈ 1 erreicht typischerweise über <strong>95 % Genauigkeit</strong>. Wichtig: genügend Epochen trainieren, bis der Fehler nicht mehr sinkt. Mehr Neuronen/Schichten bringen kaum Verbesserung, erhöhen aber die Trainingszeit.</p>
+    </div>
+  </div>
+  <div class="ex" data-min="20">
+    <span class="tag">ARBEITSAUFTRAG 9 · Schlangen</span>
+    <div class="q">Konfiguriere ein Netz zur Klassifizierung von Schlangen (Kopfform, Körperform) in Würgeschlangen, Nattern und Vipern (Datensatz „Schlangen"). Beurteile das Ergebnis.</div>
+    <textarea placeholder="Deine Konfiguration und Beobachtung …" style="min-height:70px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Mit 3 Ausgabeneuronen und einer verdeckten Schicht (≈ 5–6 Neuronen, α ≈ 1) lassen sich die drei Schlangen-Kategorien überwiegend korrekt trennen (Genauigkeit ~85–90 %). Dort, wo sich zwei Kategorien in den Merkmalen überlappen, bleiben einzelne Fehlklassifikationen – das zeigt die Confusion-Matrix. Das ist typisch, wenn die gewählten Merkmale die Klassen nicht vollständig unterscheiden.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 GRADIENT -->
+<section id="gradient">
+  <h2><span class="n">8</span> Training: Gradientenabstieg</h2>
+  <p>Jede Parameterkonfiguration (Gewichte/Bias) besitzt einen Fehlerwert. Trägt man den Fehler über den Parametern auf, entsteht eine <strong>Fehlerfläche</strong>. <strong>Ziel des Trainings</strong> ist es, ein möglichst tiefes Tal – idealerweise das <strong>globale Minimum</strong> – zu finden.</p>
+  <div class="merke">
+    <h4>Merke · Auf dem Weg ins Tal</h4>
+    <p style="margin:0">Man stellt sich einen Wanderer im Nebel vor, der ins Tal will: Er geht immer einen Schritt in Richtung des <strong>steilsten Abstiegs</strong>; je steiler, desto größer der Schritt. Mathematisch entspricht das der Berechnung des <strong>Gradienten</strong> – daher <em>Gradientenabstiegsverfahren</em>. Die <strong>Lernrate α</strong> skaliert die Schrittweite.</p>
+  </div>
+  <div class="demo">
+    <h4><span class="badge">INTERAKTIV</span> Gradientenabstieg auf der Fehlerfläche</h4>
+    <div class="grid2">
+      <canvas id="gdCanvas" width="440" height="380"></canvas>
+      <div class="ctrl">
+        <p class="hint">Die Farbfläche ist die Fehlerfläche (dunkel = kleiner Fehler). Klicke, um einen <strong>Startpunkt</strong> zu setzen, und starte den Abstieg. Variiere die Lernrate.</p>
+        <label class="sl">Lernrate α = <span id="gdAv">0.30</span><input type="range" id="gdA" min="0.02" max="2" step="0.02" value="0.3"></label>
+        <div class="row">
+          <button class="p" id="gdRun">Abstieg starten</button>
+          <button class="ghost" id="gdReset">Zurücksetzen</button>
+        </div>
+        <div class="readout" id="gdOut">…</div>
+        <p class="hint">Zu große α → Überspringen/Oszillation oder Divergenz. Zu kleine α → sehr langsame Konvergenz. Verschiedene Startpunkte können in verschiedenen Tälern (lokalen Minima) enden.</p>
+      </div>
+    </div>
+  </div>
+  <div class="merke">
+    <h4>Merke · Herausforderungen des Gradientenabstiegs</h4>
+    <ul>
+      <li><strong>Lokale Minima:</strong> der Abstieg kann in einem „Nebental" stecken bleiben statt im globalen Minimum.</li>
+      <li><strong>Plateaus:</strong> flache Bereiche mit sehr kleinem Gradienten verlangsamen das Training stark.</li>
+      <li><strong>Lernrate:</strong> zu groß → Oszillation/Divergenz; zu klein → sehr langsam.</li>
+      <li><strong>Initialisierung:</strong> ungünstige Startwerte führen in schlechte Minima. → Training mehrfach mit verschiedenen Startwerten durchführen und das beste Netz (kleinster Fehler) wählen.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- BACKPROP -->
+<section id="backprop">
+  <h2>Der Backpropagation-Algorithmus</h2>
+  <div class="merke">
+    <h4>Merke · Training in vier Schritten</h4>
+    <ol>
+      <li><strong>Forward-Propagation:</strong> Ausgabe für einen Trainingspunkt berechnen, Zwischenergebnisse merken.</li>
+      <li><strong>Fehler bestimmen:</strong> Ausgabe (z. B. (0,1 | 0,7 | 0,2)) mit dem Label (z. B. (0, 1, 0)) vergleichen; komponentenweise Abweichung (Delta).</li>
+      <li><strong>Gradient mit Backpropagation:</strong> Die Abweichung wird Schicht für Schicht ins Netz zurückgeführt; für jedes Gewicht wird die nötige Änderung berechnet (Gradient). Die Änderung wird nur <em>vorgemerkt</em>.</li>
+      <li><strong>Gesamtgradient:</strong> Schritte 1–3 für alle (bzw. viele) Datenpunkte wiederholen, die Gewichtsänderungen aufaddieren – erst dann die Gewichte <em>tatsächlich</em> aktualisieren.</li>
+    </ol>
+  </div>
+  <p>Ob nach jedem Punkt (stochastisch) oder erst nach allen Punkten (Batch) aktualisiert wird, hängt von der Strategie ab. Der Simulator in Abschnitt 5 rechnet den <strong>Gesamtgradienten</strong> über alle Punkte und aktualisiert dann – genau das siehst du beim Fallen der Fehler-Anzeige.</p>
+</section>
+
+<!-- 9 ZIFFERN -->
+<section id="ziffern">
+  <h2><span class="n">9</span> Anwendung: handgeschriebene Ziffern</h2>
+  <p>Bisher haben wir Merkmale (Augengröße, pH …) von Hand gewählt. Bei komplexen Daten wie <strong>Bildern</strong> ist das kaum möglich. Neuronale Netze lernen die Merkmale daher <strong>selbst</strong> (Representation Learning). Beim MNIST-Datensatz sind Ziffern als <strong>28×28-Graustufenbilder</strong> gegeben (Grauwerte 0–255, normiert auf 0–1).</p>
+  <p>Idee: alle <strong>784 Pixel</strong> als Eingaben verwenden → Eingabeschicht mit 784 Neuronen; 10 verschiedene Ziffern → <strong>10 Ausgabeneuronen</strong>; dazu z. B. eine verdeckte Schicht mit <strong>40 Neuronen</strong>.</p>
+  <div class="ex" data-min="20">
+    <span class="tag">ARBEITSAUFTRAG 10 · Ziffern beschreiben</span>
+    <div class="q">Nenne Merkmale, anhand derer man (normierte) Ziffern beschreiben könnte.</div>
+    <textarea placeholder="Deine Merkmalsideen …" style="min-height:70px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Mögliche Merkmale: Anzahl geschlossener Schleifen (0,6,8,9 haben welche), Symmetrie, Verhältnis Höhe/Breite, Lage/Anzahl von Linienenden, Anteil gefüllter Pixel in bestimmten Regionen (oben/unten/links/rechts/Mitte), Anzahl der Schnittpunkte mit waagerechten/senkrechten Linien, Krümmung. In der Praxis überlässt man das Finden solcher Merkmale dem Netz selbst (verdeckte Schicht) statt sie von Hand festzulegen.</p>
+    </div>
+  </div>
+  <div class="ex" data-min="4">
+    <span class="tag">ARBEITSAUFTRAG 11 · Anzahl Gewichte und Bias-Werte</span>
+    <div class="q">Wie viele Gewichte und Bias-Werte hat das Netz 784 → 40 → 10?</div>
+    <div class="row">Gewichte: <input class="num" style="width:110px" placeholder="?"> &nbsp; Bias-Werte: <input class="num" style="width:90px" placeholder="?"></div>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p><strong>Gewichte:</strong> Eingabe→verdeckt: 784 · 40 = 31 360; verdeckt→Ausgabe: 40 · 10 = 400; zusammen <strong>31 760 Gewichte</strong>.<br>
+      <strong>Bias-Werte:</strong> 40 (verdeckte Schicht) + 10 (Ausgabeschicht) = <strong>50 Bias-Werte</strong>. Insgesamt also 31 810 Parameter – und das für ein bewusst sehr kleines Netz.</p>
+    </div>
+  </div>
+  <div class="ex" data-min="15">
+    <span class="tag">ARBEITSAUFTRAG 12 · Klassifizierung</span>
+    <div class="q">Wie würde ein gut trainiertes Netz ein <em>zufällig generiertes</em> 28×28-Bild (Rauschen) einordnen?</div>
+    <textarea placeholder="Deine Vermutung …" style="min-height:60px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Das Netz gibt für <em>jede</em> Eingabe eine Klasse aus – es <em>muss</em> sich für eine der 10 Ziffern entscheiden, auch wenn das Bild gar keine Ziffer ist. Bei reinem Rauschen sind die 10 Ausgabewerte meist <strong>niedrig und ähnlich groß</strong> (keine klare, hohe Aktivierung). Die „Vorhersage" (das größte Ausgabeneuron) ist damit <strong>wenig aussagekräftig / zufällig</strong>. Das zeigt eine Grenze: Ein Klassifikator erkennt nicht von selbst, dass eine Eingabe „keine gültige Ziffer" ist.</p>
+    </div>
+  </div>
+  <div class="ex" data-min="20">
+    <span class="tag">ARBEITSAUFTRAG 13 · Umsetzung in Python</span>
+    <div class="q">Im Notebook <span class="kbd">AA_13_ziffernklassifikation.ipynb</span> soll die Netz-Konfiguration so angepasst werden, dass möglichst viele Testdaten erkannt werden. Welche Stellschrauben gibt es?</div>
+    <textarea placeholder="Deine Überlegungen (Hyperparameter) …" style="min-height:70px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung (Hinweise)</h5>
+      <p>Diese Aufgabe wird im bereitgestellten Jupyter-Notebook bearbeitet (Python mit numpy/scikit-learn). Stellschrauben zur Verbesserung der Testgenauigkeit: <strong>Anzahl der verdeckten Neuronen/Schichten</strong>, <strong>Lernrate</strong>, <strong>Anzahl der Trainingsepochen</strong>, Aktivierungsfunktion, sowie Normierung der Pixelwerte (0–1). Man beobachtet den Fehler auf Trainings- <em>und</em> Testdaten: sinkt der Trainingsfehler weiter, während der Testfehler steigt, liegt <em>Overfitting</em> vor – dann Netz verkleinern oder früher stoppen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 BILDER -->
+<section id="bilder">
+  <h2><span class="n">10</span> Anwendung: Bilderkennung (Hunde &amp; Katzen)</h2>
+  <p>Zum Abschluss ein größeres Beispiel: ein Netz klassifiziert Farbbilder (256×256) binär in <em>Hund</em>/<em>Katze</em>. Dafür kommt die hochoptimierte Bibliothek <strong>TensorFlow</strong> in einem Jupyter-Notebook zum Einsatz, mit je 1000 KI-generierten Trainingsbildern pro Klasse und einem bereits trainierten Modell (<span class="kbd">hunde_vs_katzen_model.keras</span>).</p>
+  <div class="ex" data-min="15">
+    <span class="tag">ARBEITSAUFTRAG 14 · Vorbereitung Jupyter Notebook</span>
+    <div class="q">Welche Schritte sind nötig, um die Umgebung vorzubereiten? Worauf muss man bei der Python-Installation achten?</div>
+    <textarea placeholder="Deine Stichpunkte …" style="min-height:60px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung</h5>
+      <p>Python von python.org installieren und dabei <strong>„Add python.exe to PATH"</strong> aktivieren. Danach in der Eingabeaufforderung installieren: <span class="kbd">pip install notebook</span> sowie <span class="kbd">pip install tensorflow matplotlib numpy</span>. Häufige Fehlerquelle: <strong>mehrere Python-Versionen</strong> auf dem Rechner → möglichst nur eine Version installiert lassen, um Paketkonflikte zu vermeiden.</p>
+    </div>
+  </div>
+  <div class="ex" data-min="15">
+    <span class="tag">ARBEITSAUFTRAG 15 · Training &amp; Klassifikation</span>
+    <div class="q">Beschreibe den Ablauf: ZIP herunterladen/entpacken, Jupyter starten, Notebook durcharbeiten. Was bewirken die einzelnen Codeblöcke grob?</div>
+    <textarea placeholder="Dein Ablaufplan …" style="min-height:70px"></textarea>
+    <button class="reveal" disabled>Lösung anzeigen</button>
+    <div class="solution" hidden>
+      <h5>Musterlösung (Hinweise)</h5>
+      <p>Den bereitgestellten ZIP-Ordner entpacken, in der Konsole per <span class="kbd">cd</span> in den Ordner wechseln und <span class="kbd">jupyter notebook</span> starten. Das Notebook <span class="kbd">katzen_und_hunde_klassifikation.ipynb</span> öffnen und die Blöcke der Reihe nach mit dem Play-Button ausführen: typischerweise (1) Bibliotheken importieren, (2) Bilddaten laden/vorverarbeiten (normieren, in Trainings-/Testmenge teilen), (3) Modell definieren bzw. das vortrainierte <span class="kbd">.keras</span>-Modell laden, (4) trainieren bzw. Vorhersagen berechnen, (5) einzelne Testbilder klassifizieren und das Ergebnis anzeigen. Diese Aufgabe läuft in der lokalen Python-Umgebung, nicht im Browser.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Interaktives Lernmodul zu künstlichen neuronalen Netzen · Informatik 13. Klasse.<br>
+  Fachliche Grundlage: ISB-Arbeitsheft „Künstliche Neuronale Netze" (Christian Reitmaier · Dr. Wolfgang Pfeffer · Tobias Fuchs · Christoph Gräßl, KI@Informatik13, CC-BY-NC-SA). Datensätze aus dem zugehörigen Materialordner. Simulator inspiriert vom NetLaboratory (klassenkarte.de/netlab).
+</footer>
+
+<script>
+"use strict";
+const DATA = /*__DATA__*/ {"tiere_linear": {"name": "Tiere · linear trennbar (2 Klassen)", "xlabel": "Merkmal 1 (Augengröße)", "ylabel": "Merkmal 2 (Zahnlänge)", "classes": ["Klasse 1", "Klasse 2"], "points": [[1.0, 4.0, 0], [2.0, 6.0, 0], [2.5, 4.5, 0], [1.5, 3.0, 0], [1.0, 2.5, 0], [4.0, 0.0, 1], [2.0, 2.0, 1], [4.0, 2.0, 1], [3.0, 3.0, 1], [4.0, 4.0, 1], [3.0, 0.0, 1], [2.5, 0.5, 1]], "names": ["Hai", "Tiger", "Wolf", "Klapperschlange", "Krokodil", "Pinguin", "Schaf", "Hase", "Hamster", "Koboldmaki", "Ameisenigel", "Faultier"]}, "tiere_nichtlinear": {"name": "Tiere · nicht linear trennbar (2 Klassen)", "xlabel": "Merkmal 1 (Augengröße)", "ylabel": "Merkmal 2 (Zahnlänge)", "classes": ["Klasse 1", "Klasse 2"], "points": [[1.0, 4.0, 0], [2.0, 6.0, 0], [2.5, 5.0, 0], [1.0, 3.0, 0], [1.0, 2.5, 0], [4.0, 0.0, 1], [2.0, 2.0, 1], [4.0, 2.0, 1], [3.0, 3.0, 1], [4.0, 4.0, 1], [3.0, 0.0, 1], [2.5, 0.5, 1], [3.0, 8.0, 1], [2.5, 6.5, 1], [1.0, 6.0, 1]], "names": ["Hai", "Tiger", "Wolf", "Klapperschlange", "Krokodil", "Pinguin", "Schaf", "Hase", "Hamster", "Koboldmaki", "Ameisenigel", "Faultier", "Elefant", "Walross", "Warzenschwein"]}, "tiere_3": {"name": "Tiere · 3 Klassen", "xlabel": "Merkmal 1 (Augengröße)", "ylabel": "Merkmal 2 (Zahnlänge)", "classes": ["Klasse 1", "Klasse 2", "Klasse 3"], "points": [[1.0, 4.0, 0], [2.0, 6.0, 0], [2.5, 5.0, 0], [1.0, 3.0, 0], [1.0, 2.5, 0], [4.0, 0.0, 2], [2.0, 2.0, 2], [4.0, 2.0, 2], [3.0, 3.0, 2], [4.0, 4.0, 2], [3.0, 0.0, 2], [2.5, 0.5, 2], [3.0, 8.0, 1], [2.5, 6.5, 1], [1.0, 6.0, 1]], "names": ["Hai", "Tiger", "Wolf", "Klapperschlange", "Krokodil", "Pinguin", "Schaf", "Hase", "Hamster", "Koboldmaki", "Ameisenigel", "Faultier", "Elefant", "Walross", "Warzenschwein"]}, "champignons": {"name": "Champignons · 3 Güteklassen", "xlabel": "Größe (normiert)", "ylabel": "Farb-Homogenität (normiert)", "classes": ["Klasse 1", "Klasse 2", "Klasse 3"], "points": [[0.48, 0.102, 0], [0.522, 0.132, 0], [0.416, 0.092, 0], [0.442, 0.118, 0], [0.334, 0.114, 0], [0.29, 0.106, 0], [0.31, 0.154, 0], [0.394, 0.122, 0], [0.422, 0.152, 0], [0.338, 0.188, 0], [0.392, 0.186, 0], [0.396, 0.232, 0], [0.474, 0.256, 0], [0.754, 0.096, 0], [0.29, 0.078, 0], [0.342, 0.082, 0], [0.546, 0.086, 0], [0.6, 0.096, 0], [0.69, 0.086, 0], [0.642, 0.102, 0], [0.594, 0.124, 0], [0.556, 0.156, 0], [0.5, 0.172, 0], [0.452, 0.192, 0], [0.476, 0.206, 0], [0.52, 0.244, 0], [0.584, 0.236, 0], [0.638, 0.222, 0], [0.686, 0.188, 0], [0.738, 0.152, 0], [0.702, 0.126, 0], [0.68, 0.148, 0], [0.63, 0.194, 0], [0.586, 0.188, 0], [0.544, 0.192, 0], [0.646, 0.064, 0], [0.466, 0.082, 0], [0.216, 0.1, 1], [0.26, 0.134, 1], [0.22, 0.158, 1], [0.262, 0.204, 1], [0.334, 0.232, 1], [0.28, 0.278, 1], [0.36, 0.314, 1], [0.496, 0.47, 1], [0.394, 0.44, 1], [0.314, 0.356, 1], [0.838, 0.096, 1], [0.792, 0.098, 1], [0.834, 0.16, 1], [0.578, 0.456, 1], [0.67, 0.43, 1], [0.73, 0.362, 1], [0.79, 0.302, 1], [0.804, 0.234, 1], [0.776, 0.17, 1], [0.742, 0.206, 1], [0.762, 0.256, 1], [0.628, 0.27, 1], [0.726, 0.306, 1], [0.556, 0.282, 1], [0.496, 0.306, 1], [0.418, 0.29, 1], [0.422, 0.362, 1], [0.456, 0.4, 1], [0.514, 0.346, 1], [0.528, 0.41, 1], [0.588, 0.342, 1], [0.608, 0.396, 1], [0.674, 0.35, 1], [0.632, 0.366, 1], [0.632, 0.318, 1], [0.722, 0.27, 1], [0.142, 0.204, 2], [0.208, 0.328, 2], [0.16, 0.446, 2], [0.176, 0.644, 2], [0.228, 0.784, 2], [0.856, 0.854, 2], [0.342, 0.538, 2], [0.392, 0.746, 2], [0.31, 0.64, 2], [0.446, 0.618, 2], [0.528, 0.572, 2], [0.564, 0.698, 2], [0.648, 0.572, 2], [0.762, 0.452, 2], [0.928, 0.11, 2], [0.896, 0.226, 2], [0.862, 0.354, 2], [0.932, 0.298, 2], [0.848, 0.446, 2], [0.898, 0.546, 2], [0.772, 0.538, 2], [0.796, 0.652, 2], [0.866, 0.652, 2], [0.268, 0.446, 2], [0.434, 0.54, 2], [0.54, 0.87, 2], [0.726, 0.75, 2], [0.578, 0.54, 2], [0.666, 0.65, 2], [0.232, 0.554, 2], [0.132, 0.088, 2], [0.954, 0.072, 2]], "names": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, "schlangen": {"name": "Schlangen · 3 Kategorien", "xlabel": "Kopfform", "ylabel": "Körperform", "classes": ["Würgeschlange", "Viper", "Natter"], "points": [[3.0, 1.5, 0], [5.0, 1.8, 0], [4.5, 1.7, 0], [3.8, 1.6, 0], [3.5, 2.0, 0], [2.5, 2.5, 0], [3.3, 1.9, 0], [3.7, 1.8, 0], [4.8, 1.9, 0], [4.0, 1.7, 0], [2.8, 2.1, 0], [2.0, 2.3, 0], [3.1, 2.0, 0], [3.4, 2.1, 0], [1.5, 3.0, 1], [1.2, 2.8, 1], [2.0, 2.2, 1], [1.8, 2.5, 1], [2.2, 2.7, 1], [2.5, 2.9, 1], [1.9, 2.6, 1], [1.7, 2.4, 1], [2.3, 2.5, 1], [2.1, 2.3, 1], [2.0, 2.4, 1], [1.8, 2.6, 1], [2.1, 2.7, 1], [2.4, 2.8, 1], [2.2, 2.5, 1], [1.9, 2.3, 1], [1.6, 2.4, 1], [1.4, 2.6, 1], [2.3, 2.7, 1], [2.8, 1.6, 2], [3.2, 1.7, 2], [4.0, 1.5, 2], [3.5, 1.4, 2], [5.0, 1.8, 2], [4.8, 1.7, 2], [3.6, 1.6, 2], [3.4, 1.5, 2], [4.2, 1.5, 2], [3.0, 1.8, 2], [3.3, 1.4, 2], [2.9, 1.6, 2], [3.8, 1.5, 2], [3.7, 1.5, 2], [4.1, 1.6, 2], [3.9, 1.3, 2]], "names": ["Königspython", "Netzpython", "Burma-Python", "Grüner Baumpython", "Boa Constrictor", "Anakonda", "Madagaskar-Boa", "Regenbogenboa", "Felsenpython", "Tanimbarpython", "Blutpython", "Sandboa", "Westliche Madagaskar-Boa", "Argentinische Boa", "Gabunviper", "Puffotter", "Kreuzotter", "Hornviper", "Klapperschlange", "Buschmeister", "Bothrops-Lanzenotter", "Höllenotter", "Speikobra", "Jararaca-Lanzenotter", "Mangrovenotter", "Felsen-Klapperschlange", "Mojave-Klapperschlange", "Texas-Klapperschlange", "Mexikanische Lanzenotter", "Grubenotter", "Bergviper", "Indische Sandrasselotter", "Westliche Diamantklapperschlange", "Ringelnatter", "Zornnatter", "Äskulapnatter", "Strumpfbandnatter", "Schwarze Mamba", "Taipan", "Boomslang", "Korallenschlange", "Rote Rennnatter", "Kupferkopf", "Gelbkopf-Seeschlange", "Zebranatter", "Östliche Braunnatter", "Binden-Langschnauzennatter", "Graue Rattennatter", "Peitschennatter"]}, "iris": {"name": "Blumen (Iris) · 3 Arten", "xlabel": "Kelchblattlänge", "ylabel": "Kelchblattbreite", "classes": ["setosa", "versicolor", "virginica"], "points": [[5.1, 3.5, 0], [4.9, 3.0, 0], [4.7, 3.2, 0], [4.6, 3.1, 0], [5.0, 3.6, 0], [5.4, 3.9, 0], [4.6, 3.4, 0], [5.0, 3.4, 0], [4.4, 2.9, 0], [4.9, 3.1, 0], [5.4, 3.7, 0], [4.8, 3.4, 0], [4.8, 3.0, 0], [4.3, 3.0, 0], [5.8, 4.0, 0], [5.7, 4.4, 0], [5.4, 3.9, 0], [5.1, 3.5, 0], [5.7, 3.8, 0], [5.1, 3.8, 0], [5.4, 3.4, 0], [5.1, 3.7, 0], [4.6, 3.6, 0], [5.1, 3.3, 0], [4.8, 3.4, 0], [5.0, 3.0, 0], [5.0, 3.4, 0], [5.2, 3.5, 0], [5.2, 3.4, 0], [4.7, 3.2, 0], [4.8, 3.1, 0], [5.4, 3.4, 0], [5.2, 4.1, 0], [5.5, 4.2, 0], [4.9, 3.1, 0], [5.0, 3.2, 0], [5.5, 3.5, 0], [4.9, 3.6, 0], [4.4, 3.0, 0], [5.1, 3.4, 0], [5.0, 3.5, 0], [4.5, 2.3, 0], [4.4, 3.2, 0], [5.0, 3.5, 0], [5.1, 3.8, 0], [4.8, 3.0, 0], [5.1, 3.8, 0], [4.6, 3.2, 0], [5.3, 3.7, 0], [5.0, 3.3, 0], [7.0, 3.2, 1], [6.4, 3.2, 1], [6.9, 3.1, 1], [5.5, 2.3, 1], [6.5, 2.8, 1], [5.7, 2.8, 1], [6.3, 3.3, 1], [4.9, 2.4, 1], [6.6, 2.9, 1], [5.2, 2.7, 1], [5.0, 2.0, 1], [5.9, 3.0, 1], [6.0, 2.2, 1], [6.1, 2.9, 1], [5.6, 2.9, 1], [6.7, 3.1, 1], [5.6, 3.0, 1], [5.8, 2.7, 1], [6.2, 2.2, 1], [5.6, 2.5, 1], [5.9, 3.2, 1], [6.1, 2.8, 1], [6.3, 2.5, 1], [6.1, 2.8, 1], [6.4, 2.9, 1], [6.6, 3.0, 1], [6.8, 2.8, 1], [6.7, 3.0, 1], [6.0, 2.9, 1], [5.7, 2.6, 1], [5.5, 2.4, 1], [5.5, 2.4, 1], [5.8, 2.7, 1], [6.0, 2.7, 1], [5.4, 3.0, 1], [6.0, 3.4, 1], [6.7, 3.1, 1], [6.3, 2.3, 1], [5.6, 3.0, 1], [5.5, 2.5, 1], [5.5, 2.6, 1], [6.1, 3.0, 1], [5.8, 2.6, 1], [5.0, 2.3, 1], [5.6, 2.7, 1], [5.7, 3.0, 1], [5.7, 2.9, 1], [6.2, 2.9, 1], [5.1, 2.5, 1], [5.7, 2.8, 1], [6.3, 3.3, 2], [5.8, 2.7, 2], [7.1, 3.0, 2], [6.3, 2.9, 2], [6.5, 3.0, 2], [7.6, 3.0, 2], [4.9, 2.5, 2], [7.3, 2.9, 2], [6.7, 2.5, 2], [7.2, 3.6, 2], [6.5, 3.2, 2], [6.4, 2.7, 2], [6.8, 3.0, 2], [5.7, 2.5, 2], [5.8, 2.8, 2], [6.4, 3.2, 2], [6.5, 3.0, 2], [7.7, 3.8, 2], [7.7, 2.6, 2], [6.0, 2.2, 2], [6.9, 3.2, 2], [5.6, 2.8, 2], [7.7, 2.8, 2], [6.3, 2.7, 2], [6.7, 3.3, 2], [7.2, 3.2, 2], [6.2, 2.8, 2], [6.1, 3.0, 2], [6.4, 2.8, 2], [7.2, 3.0, 2], [7.4, 2.8, 2], [7.9, 3.8, 2], [6.4, 2.8, 2], [6.3, 2.8, 2], [6.1, 2.6, 2], [7.7, 3.0, 2], [6.3, 3.4, 2], [6.4, 3.1, 2], [6.0, 3.0, 2], [6.9, 3.1, 2], [6.7, 3.1, 2], [6.9, 3.1, 2], [5.8, 2.7, 2], [6.8, 3.2, 2], [6.7, 3.3, 2], [6.7, 3.0, 2], [6.3, 2.5, 2], [6.5, 3.0, 2], [6.2, 3.4, 2], [5.9, 3.0, 2]], "names": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}};
+const PAL=['#0d9488','#d97706','#9333ea','#2563eb'];
+const fmt=(x,d)=>x.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
+const sig=x=>1/(1+Math.exp(-x));
+function LCG(s){s>>>=0;return()=>{s=(1664525*s+1013904223)>>>0;return s/4294967296;};}
+
+/* ============ 1 · Unplugged Trenngeraden ============ */
+(function(){
+  const cv=document.getElementById('unpCanvas'),ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,m=34, XR=6,YR=8;
+  const sx=x=>m+x/XR*(W-2*m), sy=y=>H-m-y/YR*(H-2*m);
+  // Orinoco fish sample: green (wohl) inside a region, red outside
+  const green=[[3,4],[3.5,4.5],[4,4],[3.2,3.6],[3.8,4.3],[3.5,5],[4.2,4.6]];
+  const red=[[1,1],[1.5,6.5],[5,2],[5.2,6],[1,4],[5.5,4],[2,7],[4.8,1],[1.2,2.5]];
+  const els=id=>document.getElementById(id);
+  const S=['u_a1','u_o1','u_a2','u_o2','u_a3','u_o3'].map(els);
+  const out=els('unpOut');
+  function lineSide(px,py,ang,off){ const a=ang*Math.PI/180; const nx=Math.sin(a),ny=-Math.cos(a);
+    return nx*(sx(px)-W/2)+ny*(sy(py)-H/2)-off; }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#eef2f7';for(let x=0;x<=XR;x++){ctx.beginPath();ctx.moveTo(sx(x),sy(0));ctx.lineTo(sx(x),sy(YR));ctx.stroke();}
+    for(let y=0;y<=YR;y++){ctx.beginPath();ctx.moveTo(sx(0),sy(y));ctx.lineTo(sx(XR),sy(y));ctx.stroke();}
+    ctx.strokeStyle='#94a3b8';ctx.beginPath();ctx.moveTo(sx(0),sy(0));ctx.lineTo(sx(XR),sy(0));ctx.stroke();
+    ctx.beginPath();ctx.moveTo(sx(0),sy(0));ctx.lineTo(sx(0),sy(YR));ctx.stroke();
+    ctx.fillStyle='#94a3b8';ctx.font='11px sans-serif';ctx.fillText('Temperatur',W-78,H-16);
+    ctx.save();ctx.translate(12,66);ctx.rotate(-Math.PI/2);ctx.fillText('pH-Wert',0,0);ctx.restore();
+    const cfg=[[+S[0].value,+S[1].value],[+S[2].value,+S[3].value],[+S[4].value,+S[5].value]];
+    cfg.forEach((c,i)=>{ const a=c[0]*Math.PI/180,off=c[1],dx=Math.cos(a),dy=Math.sin(a),nx=Math.sin(a),ny=-Math.cos(a);
+      const cx=W/2+nx*off,cy=H/2+ny*off; ctx.strokeStyle=['#4338ca','#0891b2','#7c3aed'][i];ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(cx-dx*600,cy-dy*600);ctx.lineTo(cx+dx*600,cy+dy*600);ctx.stroke(); });
+    function fires(px,py){ return cfg.every(c=>lineSide(px,py,c[0],c[1])<0); }
+    let gok=0,rok=0;
+    green.forEach(p=>{const f=fires(p[0],p[1]); if(f)gok++; ctx.fillStyle='#16a34a';ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),6,0,7);ctx.fill();
+      if(!f){ctx.strokeStyle='#dc2626';ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),9,0,7);ctx.stroke();}});
+    red.forEach(p=>{const f=fires(p[0],p[1]); if(!f)rok++; ctx.fillStyle='#dc2626';ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),6,0,7);ctx.fill();
+      if(f){ctx.strokeStyle='#16a34a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),9,0,7);ctx.stroke();}});
+    out.textContent='Alle drei Neuronen „feuern" (UND) → grün.\nKorrekt grün: '+gok+'/'+green.length+'   korrekt rot: '+rok+'/'+red.length
+      +(gok===green.length&&rok===red.length?'\n★ Perfekt getrennt!':'');
+  }
+  S.forEach(s=>s.addEventListener('input',draw)); draw();
+})();
+
+/* ============ Sigmoid ============ */
+(function(){
+  const cv=document.getElementById('sigCanvas'),ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,m=30;
+  const sx=x=>m+(x+8)/16*(W-2*m), sy=y=>H-m-y*(H-2*m);
+  const xEl=document.getElementById('sigX'),xV=document.getElementById('sigXv'),out=document.getElementById('sigOut');
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#e2e8f0';ctx.beginPath();ctx.moveTo(sx(-8),sy(0.5));ctx.lineTo(sx(8),sy(0.5));ctx.stroke();
+    ctx.strokeStyle='#94a3b8';ctx.beginPath();ctx.moveTo(sx(0),sy(0));ctx.lineTo(sx(0),sy(1));ctx.stroke();
+    ctx.beginPath();ctx.moveTo(sx(-8),sy(0));ctx.lineTo(sx(8),sy(0));ctx.stroke();
+    ctx.fillStyle='#94a3b8';ctx.font='10px sans-serif';ctx.fillText('1',sx(-8)-14,sy(1)+4);ctx.fillText('0',sx(-8)-14,sy(0)+4);ctx.fillText('0,5',sx(0)+4,sy(0.5)-4);
+    ctx.strokeStyle='#4338ca';ctx.lineWidth=2.5;ctx.beginPath();
+    for(let px=-8;px<=8;px+=0.1){const y=sig(px);const X=sx(px),Y=sy(y);px===-8?ctx.moveTo(X,Y):ctx.lineTo(X,Y);}ctx.stroke();
+    const x=+xEl.value,y=sig(x);
+    ctx.strokeStyle='#dc2626';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(sx(x),sy(0));ctx.lineTo(sx(x),sy(y));ctx.lineTo(sx(-8),sy(y));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#dc2626';ctx.beginPath();ctx.arc(sx(x),sy(y),5,0,7);ctx.fill();
+    xV.textContent=fmt(x,1); out.textContent='S('+fmt(x,1)+') = 1 / (1 + e^(−'+fmt(x,1)+'))\n           = '+fmt(y,4);
+  }
+  xEl.addEventListener('input',draw);draw();
+})();
+
+/* ============ 3 · Forward-Rechner (2-2-1) ============ */
+(function(){
+  const cv=document.getElementById('fwCanvas'),ctx=cv.getContext('2d');
+  const ids=['fw_x1','fw_x2','fw_h1w1','fw_h1w2','fw_h1b','fw_h2w1','fw_h2w2','fw_h2b','fw_ow1','fw_ow2','fw_ob'];
+  const el={};ids.forEach(i=>el[i]=document.getElementById(i));
+  const out=document.getElementById('fwOut');
+  function val(i){return parseFloat(el[i].value)||0;}
+  function draw(){
+    const x1=val('fw_x1'),x2=val('fw_x2');
+    const h1=sig(val('fw_h1w1')*x1+val('fw_h1w2')*x2+val('fw_h1b'));
+    const h2=sig(val('fw_h2w1')*x1+val('fw_h2w2')*x2+val('fw_h2b'));
+    const o=sig(val('fw_ow1')*h1+val('fw_ow2')*h2+val('fw_ob'));
+    // diagram
+    ctx.clearRect(0,0,cv.width,cv.height);
+    const cols=[60,200,360], ys=[[90,210],[110,190],[150]], vals=[[x1,x2],[h1,h2],[o]], labs=[['x₁','x₂'],['H₁','H₂'],['O']];
+    // edges
+    function edge(x0,y0,x1_,y1_,w){ ctx.strokeStyle=w>=0?'#2563eb':'#ea580c'; ctx.lineWidth=Math.min(6,0.5+Math.abs(w)*1.5);
+      ctx.globalAlpha=.7;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1_,y1_);ctx.stroke();ctx.globalAlpha=1; }
+    edge(cols[0],ys[0][0],cols[1],ys[1][0],val('fw_h1w1'));edge(cols[0],ys[0][1],cols[1],ys[1][0],val('fw_h1w2'));
+    edge(cols[0],ys[0][0],cols[1],ys[1][1],val('fw_h2w1'));edge(cols[0],ys[0][1],cols[1],ys[1][1],val('fw_h2w2'));
+    edge(cols[1],ys[1][0],cols[2],ys[2][0],val('fw_ow1'));edge(cols[1],ys[1][1],cols[2],ys[2][0],val('fw_ow2'));
+    for(let L=0;L<3;L++)for(let i=0;i<ys[L].length;i++){ const X=cols[L],Y=ys[L][i];
+      ctx.fillStyle='#fff';ctx.strokeStyle='#334155';ctx.lineWidth=2;ctx.beginPath();ctx.arc(X,Y,20,0,7);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#1e293b';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(labs[L][i],X,Y-3);
+      ctx.font='11px sans-serif';ctx.fillStyle='#4338ca';ctx.fillText(fmt(vals[L][i],2),X,Y+12);ctx.textAlign='left'; }
+    ctx.fillStyle='#64748b';ctx.font='10px sans-serif';ctx.fillText('Eingabe',30,H_(20));ctx.fillText('verdeckt',175,H_(20));ctx.fillText('Ausgabe',340,H_(20));
+    function H_(v){return v;}
+    out.textContent='H₁ = S('+fmt(val('fw_h1w1'),1)+'·'+x1+' + '+fmt(val('fw_h1w2'),1)+'·'+x2+' + '+fmt(val('fw_h1b'),1)+') = '+fmt(h1,3)
+      +'\nH₂ = S(…) = '+fmt(h2,3)
+      +'\nO  = S('+fmt(val('fw_ow1'),1)+'·H₁ + '+fmt(val('fw_ow2'),1)+'·H₂ + '+fmt(val('fw_ob'),1)+') = '+fmt(o,3)
+      +'\n→ Klasse: '+(o>=0.5?'friedlich (O ≥ 0,5)':'aggressiv (O < 0,5)');
+  }
+  ids.forEach(i=>el[i].addEventListener('input',draw));draw();
+})();
+
+/* ============ 4 · MSE-Rechner ============ */
+(function(){
+  const tb=document.querySelector('#mseTable tbody'),out=document.getElementById('mseOut');
+  const rows=[['Pinguin',1,0.95],['Schaf',1,0.80],['Hai',0,0.62]];
+  tb.innerHTML=rows.map((r,i)=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td><input class="num" data-i="'+i+'" value="'+r[2]+'"></td><td class="sq">–</td></tr>').join('');
+  function calc(){ let s=0; const trs=tb.querySelectorAll('tr');
+    trs.forEach((tr,i)=>{ const t=rows[i][1],y=parseFloat(tr.querySelector('input').value)||0; const e=(t-y)*(t-y); s+=e; tr.querySelector('.sq').textContent=fmt(e,4); });
+    out.textContent='Σ (t−y)² = '+fmt(s,4)+'\nMSE = '+fmt(s,4)+' / '+rows.length+' = '+fmt(s/rows.length,4); }
+  tb.addEventListener('input',calc);calc();
+})();
+
+/* ============ 5 · Netz-Simulator (MLP) ============ */
+function standardize(pts){ let mx=[0,0],sd=[0,0],n=pts.length;
+  for(const p of pts){mx[0]+=p[0];mx[1]+=p[1];}mx[0]/=n;mx[1]/=n;
+  for(const p of pts){sd[0]+=(p[0]-mx[0])**2;sd[1]+=(p[1]-mx[1])**2;}sd[0]=Math.sqrt(sd[0]/n)||1;sd[1]=Math.sqrt(sd[1]/n)||1;
+  return {mx,sd}; }
+function makeNet(sizes,rnd){ const W=[],B=[]; for(let l=1;l<sizes.length;l++){const w=[],b=[];
+  for(let i=0;i<sizes[l];i++){const r=[];for(let j=0;j<sizes[l-1];j++)r.push(rnd()*2-1);w.push(r);b.push(rnd()*2-1);}W.push(w);B.push(b);} return {W,B,sizes}; }
+function fwd(net,x){ let a=x.slice();const acts=[a];
+  for(let l=0;l<net.W.length;l++){const w=net.W[l],b=net.B[l],na=[];
+    for(let i=0;i<w.length;i++){let s=b[i];for(let j=0;j<w[i].length;j++)s+=w[i][j]*a[j];na.push(sig(s));}a=na;acts.push(a);} return acts; }
+function trainEpoch(net,X,Y,alpha){ const L=net.W.length;
+  const gW=net.W.map(w=>w.map(r=>r.map(()=>0))),gB=net.B.map(b=>b.map(()=>0));let loss=0;
+  for(let s=0;s<X.length;s++){ const acts=fwd(net,X[s]),out=acts[L],t=Y[s];
+    let delta=out.map((o,k)=>{loss+=(t[k]-o)**2;return (o-t[k])*o*(1-o);});
+    for(let l=L-1;l>=0;l--){ const aP=acts[l];
+      for(let i=0;i<net.W[l].length;i++){gB[l][i]+=delta[i];for(let j=0;j<net.W[l][i].length;j++)gW[l][i][j]+=delta[i]*aP[j];}
+      if(l>0){const nd=new Array(net.W[l-1].length).fill(0);
+        for(let j=0;j<net.W[l][0].length;j++){let sum=0;for(let i=0;i<net.W[l].length;i++)sum+=net.W[l][i][j]*delta[i];nd[j]=sum*acts[l][j]*(1-acts[l][j]);}delta=nd;}}}
+  const N=X.length; for(let l=0;l<L;l++)for(let i=0;i<net.W[l].length;i++){net.B[l][i]-=alpha*gB[l][i]/N;
+    for(let j=0;j<net.W[l][i].length;j++)net.W[l][i][j]-=alpha*gW[l][i][j]/N;} return loss/N; }
+
+(function(){
+  const cv=document.getElementById('nnCanvas'),ctx=cv.getContext('2d');
+  const ac=document.getElementById('nnArch'),actx=ac.getContext('2d');
+  const dsSel=document.getElementById('nnDS'),lSel=document.getElementById('nnL'),nEl=document.getElementById('nnN'),nV=document.getElementById('nnNv');
+  const aSel=document.getElementById('nnA'),out=document.getElementById('nnOut'),legend=document.getElementById('nnLegend');
+  const bPlay=document.getElementById('nnPlay'),bStep=document.getElementById('nnStep'),bReset=document.getElementById('nnReset');
+  const bEval=document.getElementById('nnEval'),evalOut=document.getElementById('nnEvalOut');
+  Object.keys(DATA).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=DATA[k].name;dsSel.appendChild(o);});
+  let ds,K,st,X,Y,net,epoch,loss,raf=null,bnd;
+  function bounds(){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for(const p of ds.points){x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]);}
+    const px=(x1-x0)*0.1+.5,py=(y1-y0)*0.1+.5; return {x0:x0-px,y0:y0-py,x1:x1+px,y1:y1+py}; }
+  const m=34; const sx=x=>m+(x-bnd.x0)/(bnd.x1-bnd.x0)*(cv.width-2*m), sy=y=>cv.height-m-(y-bnd.y0)/(bnd.y1-bnd.y0)*(cv.height-2*m);
+  function std(x,y){ return [(x-st.mx[0])/st.sd[0],(y-st.mx[1])/st.sd[1]]; }
+  function build(){ if(raf){cancelAnimationFrame(raf);raf=null;bPlay.textContent='▶ Training';}
+    ds=DATA[dsSel.value];K=ds.classes.length;st=standardize(ds.points);bnd=bounds();
+    X=ds.points.map(p=>std(p[0],p[1]));Y=ds.points.map(p=>{const y=new Array(K).fill(0);y[p[2]]=1;return y;});
+    const L=parseInt(lSel.value),n=parseInt(nEl.value);const sizes=[2];for(let i=0;i<L;i++)sizes.push(n);sizes.push(K);
+    net=makeNet(sizes,LCG(Math.floor(Math.random()*1e9)));epoch=0;loss=NaN;nV.textContent=nEl.value;
+    legend.innerHTML=ds.classes.map((c,i)=>'<span><span class="dot" style="background:'+PAL[i]+'"></span>'+c+'</span>').join('');
+    evalOut.innerHTML='';draw(); }
+  function predict(x,y){ const o=fwd(net,std(x,y))[net.W.length]; let bi=0;for(let i=1;i<o.length;i++)if(o[i]>o[bi])bi=i;return bi; }
+  function draw(){
+    const step=8;
+    for(let px=m;px<cv.width-m;px+=step)for(let py=m;py<cv.height-m;py+=step){
+      const x=bnd.x0+(px-m)/(cv.width-2*m)*(bnd.x1-bnd.x0), y=bnd.y0+(cv.height-m-py)/(cv.height-2*m)*(bnd.y1-bnd.y0);
+      ctx.fillStyle=PAL[predict(x,y)]+'26';ctx.fillRect(px,py,step,step); }
+    ctx.strokeStyle='#cbd5e1';ctx.strokeRect(m,m,cv.width-2*m,cv.height-2*m);
+    ctx.fillStyle='#64748b';ctx.font='10px sans-serif';ctx.fillText(ds.xlabel,cv.width-Math.min(150,ds.xlabel.length*6)-8,cv.height-m+15);
+    ctx.save();ctx.translate(12,cv.height-m-2);ctx.rotate(-Math.PI/2);ctx.fillText(ds.ylabel,0,0);ctx.restore();
+    ds.points.forEach(p=>{ const ok=predict(p[0],p[1])===p[2];
+      ctx.fillStyle=PAL[p[2]];ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),5,0,7);ctx.fill();
+      ctx.strokeStyle=ok?'#fff':'#0f172a';ctx.lineWidth=ok?1.5:2.5;ctx.stroke(); });
+    out.textContent='Datensatz: '+ds.name+'\nArchitektur: '+net.sizes.join(' – ')+'   α = '+aSel.value
+      +'\nEpoche: '+epoch+'   Fehler (MSE): '+(isNaN(loss)?'–':fmt(loss,4));
+    drawArch();
+  }
+  function drawArch(){
+    actx.clearRect(0,0,ac.width,ac.height); const nl=net.sizes.length;
+    const colX=i=>40+i/(nl-1)*(ac.width-80);
+    const posY=(cnt,i)=>ac.height/2+(i-(cnt-1)/2)*Math.min(34,(ac.height-30)/Math.max(cnt,1));
+    for(let l=0;l<net.W.length;l++){ const inC=net.sizes[l],outC=net.sizes[l+1];
+      for(let i=0;i<outC;i++)for(let j=0;j<inC;j++){ const w=net.W[l][i][j];
+        actx.strokeStyle=w>=0?'#2563eb':'#ea580c';actx.globalAlpha=Math.min(.8,.15+Math.abs(w)*.25);actx.lineWidth=Math.min(4,.4+Math.abs(w));
+        actx.beginPath();actx.moveTo(colX(l),posY(inC,j));actx.lineTo(colX(l+1),posY(outC,i));actx.stroke(); } }
+    actx.globalAlpha=1;
+    for(let l=0;l<nl;l++){const cnt=net.sizes[l];for(let i=0;i<cnt;i++){
+      actx.fillStyle=l===0?'#e2e8f0':(l===nl-1?PAL[i%PAL.length]:'#c7d2fe');actx.strokeStyle='#475569';actx.lineWidth=1.2;
+      actx.beginPath();actx.arc(colX(l),posY(cnt,i),8,0,7);actx.fill();actx.stroke();}}
+    actx.fillStyle='#64748b';actx.font='9px sans-serif';actx.fillText('Eingabe',20,12);actx.fillText('Ausgabe',ac.width-52,12);
+  }
+  function loop(){ for(let i=0;i<3;i++){loss=trainEpoch(net,X,Y,parseFloat(aSel.value));epoch++;} draw(); raf=requestAnimationFrame(loop); }
+  bPlay.onclick=()=>{ if(raf){cancelAnimationFrame(raf);raf=null;bPlay.textContent='▶ Training';} else {bPlay.textContent='⏸ Pause';loop();} };
+  bStep.onclick=()=>{ for(let i=0;i<50;i++){loss=trainEpoch(net,X,Y,parseFloat(aSel.value));epoch++;} draw(); };
+  bReset.onclick=build; dsSel.onchange=build; lSel.onchange=build; nEl.oninput=build; aSel.onchange=draw;
+  bEval.onclick=()=>{ const cm=Array.from({length:K},()=>new Array(K).fill(0)); let corr=0;
+    ds.points.forEach(p=>{const pr=predict(p[0],p[1]);cm[p[2]][pr]++;if(pr===p[2])corr++;});
+    let h='<table class="tbl" style="margin-top:8px"><tr><th>tat.\\vorh.</th>'+ds.classes.map((c,i)=>'<th style="color:'+PAL[i]+'">'+(i+1)+'</th>').join('')+'</tr>';
+    for(let i=0;i<K;i++){h+='<tr><th style="color:'+PAL[i]+'">'+(i+1)+'</th>'+cm[i].map((v,j)=>'<td style="'+(i===j?'background:#dcfce7;font-weight:700':'')+'">'+v+'</td>').join('')+'</tr>';}
+    h+='</table><div class="hint">Klassen: '+ds.classes.map((c,i)=>(i+1)+'='+c).join(', ')+'</div>';
+    h+='<div class="readout" style="margin-top:6px">Genauigkeit = '+corr+' / '+ds.points.length+' = '+fmt(100*corr/ds.points.length,1)+' %</div>';
+    evalOut.innerHTML=h; };
+  build();
+})();
+
+/* ============ 8 · Gradientenabstieg auf Fehlerfläche ============ */
+(function(){
+  const cv=document.getElementById('gdCanvas'),ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,R=8; // w1,w2 in [-R,R]
+  const sx=w=>W/2+w/R*(W/2-10), sy=w=>H/2-w/R*(H/2-10);
+  const ix=px=>(px-W/2)/(W/2-10)*R, iy=py=>-(py-H/2)/(H/2-10)*R;
+  // single sigmoid neuron, bias fixed b=1, training points
+  const TP=[[1,1,1],[2,2,1],[3,1,0],[1,3,0],[3,3,0],[0.5,2,1]]; const b=1;
+  function err(w1,w2){ let s=0; for(const p of TP){const y=sig(w1*p[0]+w2*p[1]+b);s+=(p[2]-y)**2;} return s/TP.length; }
+  let emin=1e9,emax=-1e9; for(let i=0;i<=60;i++)for(let j=0;j<=60;j++){const e=err(-R+i/60*2*R,-R+j/60*2*R);emin=Math.min(emin,e);emax=Math.max(emax,e);}
+  const aEl=document.getElementById('gdA'),aV=document.getElementById('gdAv'),out=document.getElementById('gdOut');
+  let start=[-5,5],path=[],anim=null;
+  function grad(w1,w2){const h=1e-3;return [(err(w1+h,w2)-err(w1-h,w2))/(2*h),(err(w1,w2+h)-err(w1,w2-h))/(2*h)];}
+  function drawSurface(){
+    const step=6;
+    for(let px=0;px<W;px+=step)for(let py=0;py<H;py+=step){const e=err(ix(px),iy(py));const t=(e-emin)/(emax-emin);
+      const c=Math.floor(40+t*200); ctx.fillStyle='rgb('+(30+t*40)+','+(50+t*90)+','+(120-t*40)+')'; ctx.fillRect(px,py,step,step);}
+    ctx.strokeStyle='#94a3b8';ctx.beginPath();ctx.moveTo(sx(0),0);ctx.lineTo(sx(0),H);ctx.moveTo(0,sy(0));ctx.lineTo(W,sy(0));ctx.stroke();
+    ctx.fillStyle='#e2e8f0';ctx.font='11px sans-serif';ctx.fillText('w₁',W-20,sy(0)-6);ctx.fillText('w₂',sx(0)+6,14);
+  }
+  function draw(){ drawSurface();
+    if(path.length){ ctx.strokeStyle='#fde047';ctx.lineWidth=2;ctx.beginPath();
+      path.forEach((p,i)=>{const X=sx(p[0]),Y=sy(p[1]);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);});ctx.stroke();
+      path.forEach((p,i)=>{ctx.fillStyle=i===path.length-1?'#dc2626':'#fef08a';ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),i===path.length-1?5:2.5,0,7);ctx.fill();}); }
+    else { ctx.fillStyle='#fde047';ctx.beginPath();ctx.arc(sx(start[0]),sy(start[1]),5,0,7);ctx.fill(); }
+    const last=path.length?path[path.length-1]:start;
+    out.textContent='Startpunkt: ('+fmt(start[0],1)+' | '+fmt(start[1],1)+')   b = 1 (fest)\naktuell: w₁='+fmt(last[0],2)+', w₂='+fmt(last[1],2)+'\nFehler E = '+fmt(err(last[0],last[1]),4)+'\nSchritte: '+(path.length?path.length-1:0);
+  }
+  function run(){ if(anim){clearInterval(anim);anim=null;} path=[start.slice()]; const a=parseFloat(aEl.value);
+    anim=setInterval(()=>{ const [w1,w2]=path[path.length-1];const g=grad(w1,w2);const nw=[w1-a*g[0]*10,w2-a*g[1]*10];
+      if(Math.abs(nw[0])>R*1.5||Math.abs(nw[1])>R*1.5){path.push(nw);draw();clearInterval(anim);anim=null;out.textContent+='\n⚠ divergiert (α zu groß)!';return;}
+      path.push(nw); draw();
+      if(path.length>140||Math.hypot(g[0],g[1])<1e-3){clearInterval(anim);anim=null;} },40); }
+  cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect();const px=(e.clientX-r.left)*(W/r.width),py=(e.clientY-r.top)*(H/r.height);
+    start=[ix(px),iy(py)];path=[];if(anim){clearInterval(anim);anim=null;}draw();});
+  aEl.addEventListener('input',()=>{aV.textContent=fmt(parseFloat(aEl.value),2);});
+  document.getElementById('gdRun').onclick=run;
+  document.getElementById('gdReset').onclick=()=>{path=[];if(anim){clearInterval(anim);anim=null;}draw();};
+  draw();
+})();
+
+/* ============ Aufgaben-Freischaltung ============ */
+document.querySelectorAll('.ex').forEach(ex=>{
+  const min=parseInt(ex.dataset.min||'12');
+  const fields=ex.querySelectorAll('textarea, input.num');
+  const btn=ex.querySelector('.reveal'),sol=ex.querySelector('.solution');
+  if(!btn||!sol)return;
+  const prog=()=>{let t=0;fields.forEach(f=>t+=(f.value||'').trim().length);return t;};
+  const check=()=>{btn.disabled=prog()<min;};
+  fields.forEach(f=>f.addEventListener('input',check));
+  btn.addEventListener('click',()=>{sol.hidden=false;btn.style.display='none';});
+  check();
+});
+</script>
+</body>
+</html>
